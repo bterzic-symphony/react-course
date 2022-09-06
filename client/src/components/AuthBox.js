@@ -5,8 +5,8 @@ import { useGlobalContext } from "../context/GlobalContext";
 
 const AuthBox = ({ register }) => {
   const { getCurrentUser, user } = useGlobalContext();
-  const [email, setEmail] = React.useState("");
   const navigate = useNavigate();
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [name, setName] = React.useState("");
@@ -27,8 +27,8 @@ const AuthBox = ({ register }) => {
 
     if (register) {
       data = {
-        email,
         name,
+        email,
         password,
         confirmPassword,
       };
@@ -42,14 +42,13 @@ const AuthBox = ({ register }) => {
     axios
       .post(register ? "/api/auth/register" : "/api/auth/login", data)
       .then(() => {
-        // TODO
         getCurrentUser();
       })
-      .catch((error) => {
+      .catch((err) => {
         setLoading(false);
 
-        if (error?.response?.data) {
-          setErrors(error.response.data);
+        if (err?.response?.data) {
+          setErrors(err.response.data);
         }
       });
   };
@@ -60,6 +59,7 @@ const AuthBox = ({ register }) => {
         <div className="auth__header">
           <h1>{register ? "Register" : "Login"}</h1>
         </div>
+
         <form onSubmit={onSubmit}>
           {register && (
             <div className="auth__field">
@@ -69,6 +69,7 @@ const AuthBox = ({ register }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+
               {errors.name && <p className="auth__error">{errors.name}</p>}
             </div>
           )}
@@ -80,8 +81,10 @@ const AuthBox = ({ register }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+
             {errors.email && <p className="auth__error">{errors.email}</p>}
           </div>
+
           <div className="auth__field">
             <label>Password</label>
             <input
@@ -89,10 +92,12 @@ const AuthBox = ({ register }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+
             {errors.password && (
               <p className="auth__error">{errors.password}</p>
             )}
           </div>
+
           {register && (
             <div className="auth__field">
               <label>Confirm Password</label>
@@ -101,6 +106,7 @@ const AuthBox = ({ register }) => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+
               {errors.confirmPassword && (
                 <p className="auth__error">{errors.confirmPassword}</p>
               )}
@@ -110,11 +116,10 @@ const AuthBox = ({ register }) => {
           <div className="auth__footer">
             {Object.keys(errors).length > 0 && (
               <p className="auth__error">
-                {register
-                  ? "You have some validation errors"
-                  : "There was a problem with your login credentials"}
+                {register ? "You have some validation errors" : errors.error}
               </p>
             )}
+
             <button className="btn" type="submit" disabled={loading}>
               {register ? "Register" : "Login"}
             </button>

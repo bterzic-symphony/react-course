@@ -18,19 +18,17 @@ const globalReducer = (state, action) => {
         user: action.payload,
         fetchingUser: false,
       };
-    case "SET_COMPLETE_TODOS": {
+    case "SET_COMPLETE_TODOS":
       return {
         ...state,
         completeToDos: action.payload,
       };
-    }
-    case "SET_INCOMPLETE_TODOS": {
+    case "SET_INCOMPLETE_TODOS":
       return {
         ...state,
         incompleteToDos: action.payload,
       };
-    }
-    case "RESET_USER": {
+    case "RESET_USER":
       return {
         ...state,
         user: null,
@@ -38,7 +36,6 @@ const globalReducer = (state, action) => {
         incompleteToDos: [],
         fetchingUser: false,
       };
-    }
     default:
       return state;
   }
@@ -47,7 +44,7 @@ const globalReducer = (state, action) => {
 // create the context
 export const GlobalContext = createContext(initialState);
 
-// make provider component
+// provider component
 export const GlobalProvider = (props) => {
   const [state, dispatch] = useReducer(globalReducer, initialState);
 
@@ -77,8 +74,8 @@ export const GlobalProvider = (props) => {
       } else {
         dispatch({ type: "RESET_USER" });
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
       dispatch({ type: "RESET_USER" });
     }
   };
@@ -88,9 +85,88 @@ export const GlobalProvider = (props) => {
       await axios.put("/api/auth/logout");
 
       dispatch({ type: "RESET_USER" });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
       dispatch({ type: "RESET_USER" });
+    }
+  };
+
+  const addToDo = (toDo) => {
+    dispatch({
+      type: "SET_INCOMPLETE_TODOS",
+      payload: [toDo, ...state.incompleteToDos],
+    });
+  };
+
+  const toDoComplete = (toDo) => {
+    dispatch({
+      type: "SET_INCOMPLETE_TODOS",
+      payload: state.incompleteToDos.filter(
+        (incompleteToDo) => incompleteToDo._id !== toDo._id
+      ),
+    });
+
+    dispatch({
+      type: "SET_COMPLETE_TODOS",
+      payload: [toDo, ...state.completeToDos],
+    });
+  };
+
+  const toDoIncomplete = (toDo) => {
+    dispatch({
+      type: "SET_COMPLETE_TODOS",
+      payload: state.completeToDos.filter(
+        (completeToDo) => completeToDo._id !== toDo._id
+      ),
+    });
+
+    const newIncompleteToDos = [toDo, ...state.incompleteToDos];
+
+    dispatch({
+      type: "SET_INCOMPLETE_TODOS",
+      payload: newIncompleteToDos.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      ),
+    });
+  };
+
+  const removeToDo = (toDo) => {
+    if (toDo.complete) {
+      dispatch({
+        type: "SET_COMPLETE_TODOS",
+        payload: state.completeToDos.filter(
+          (completeToDo) => completeToDo._id !== toDo._id
+        ),
+      });
+    } else {
+      dispatch({
+        type: "SET_INCOMPLETE_TODOS",
+        payload: state.incompleteToDos.filter(
+          (incompleteToDo) => incompleteToDo._id !== toDo._id
+        ),
+      });
+    }
+  };
+
+  const updateToDo = (toDo) => {
+    if (toDo.complete) {
+      const newCompleteToDos = state.completeToDos.map((completeToDo) =>
+        completeToDo._id !== toDo._id ? completeToDo : toDo
+      );
+
+      dispatch({
+        type: "SET_COMPLETE_TODOS",
+        payload: newCompleteToDos,
+      });
+    } else {
+      const newIncompleteToDos = state.incompleteToDos.map((incompleteToDo) =>
+        incompleteToDo._id !== toDo._id ? incompleteToDo : toDo
+      );
+
+      dispatch({
+        type: "SET_INCOMPLETE_TODOS",
+        payload: newIncompleteToDos,
+      });
     }
   };
 
@@ -98,6 +174,11 @@ export const GlobalProvider = (props) => {
     ...state,
     getCurrentUser,
     logout,
+    addToDo,
+    toDoComplete,
+    toDoIncomplete,
+    removeToDo,
+    updateToDo,
   };
 
   return (

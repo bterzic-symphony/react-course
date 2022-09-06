@@ -6,7 +6,7 @@ import Dashboard from "./Dashboard";
 import { useGlobalContext } from "../context/GlobalContext";
 
 const Layout = () => {
-  const { fetchingUser } = useGlobalContext;
+  const { fetchingUser } = useGlobalContext();
 
   return fetchingUser ? (
     <div className="loading">
@@ -18,8 +18,8 @@ const Layout = () => {
 
       <Routes>
         <Route exact path="/" element={<AuthBox />} />
-        <Route exact path="/register" element={<AuthBox register />} />
-        <Route exact path="/dashboard" element={<Dashboard />} />
+        <Route path="/register" element={<AuthBox register />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );
